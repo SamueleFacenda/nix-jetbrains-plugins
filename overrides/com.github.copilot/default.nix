@@ -34,6 +34,7 @@ origPlugin.overrideAttrs (old: {
       libei
       libsecret
     ];
+  autoPatchelfIgnoreMissingDeps = [ "libc.musl-x86_64.so.1" ];
   buildPhase = ''
     agent='copilot-agent/native/${lib.toLower stdenv.hostPlatform.uname.system}${
       {
