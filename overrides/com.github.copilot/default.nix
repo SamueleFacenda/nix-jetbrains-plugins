@@ -2,7 +2,7 @@
   nodejs,
   stdenv,
   lib,
-  makeBinaryWrapper,
+  makeWrapper,
   autoPatchelfHook,
   libX11,
   libXtst,
@@ -12,6 +12,7 @@
   libpng,
   libei,
   libsecret,
+  musl,
 }:
 origPlugin:
 origPlugin.overrideAttrs (old: {
@@ -20,7 +21,7 @@ origPlugin.overrideAttrs (old: {
   # so instead we use the js form and wrap it in a binary wrapper that calls nodejs on it.
   nativeBuildInputs =
     old.nativeBuildInputs or [ ]
-    ++ [ makeBinaryWrapper ]
+    ++ [ makeWrapper ]
     ++ lib.optionals stdenv.hostPlatform.isLinux [ autoPatchelfHook ];
   buildInputs =
     old.buildInputs or [ ]
@@ -33,8 +34,9 @@ origPlugin.overrideAttrs (old: {
       glib
       libei
       libsecret
+      musl
     ];
-  autoPatchelfIgnoreMissingDeps = [ "libc.musl-x86_64.so.1" ];
+  # autoPatchelfIgnoreMissingDeps = [ "libc.musl-x86_64.so.1" ];
   buildPhase = ''
     agent='copilot-agent/native/${lib.toLower stdenv.hostPlatform.uname.system}${
       {
@@ -45,7 +47,7 @@ origPlugin.overrideAttrs (old: {
     }/copilot-language-server'
 
     rm -rf $agent
-    makeBinaryWrapper ${lib.getExe nodejs} $agent \
+    makeWrapper ${lib.getExe nodejs} $agent \
       --add-flags "$out/copilot-agent/dist/language-server.js"
   '';
   meta = {
